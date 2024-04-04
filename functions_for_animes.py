@@ -1,10 +1,11 @@
+import pandas as pd
 import time
 import requests
 import xmltodict
 from anime_info import AnimeInfo
 
 
-def get_new_data(items):
+def get_new_data_from_api(items):
     """
     Feltölt, majd visszaad egy listát animék adataival. Az adatokat az Anime News Network API biztosítja.
 
@@ -17,6 +18,8 @@ def get_new_data(items):
     query_string = ""
 
     step = 50
+
+    DELAY = 1.1
 
     ct = 1
 
@@ -67,7 +70,7 @@ def get_new_data(items):
 
         items = items[step:]
 
-        time.sleep(10)
+        time.sleep(DELAY)
 
     print("#### Batching completed ####")
 
@@ -91,3 +94,40 @@ def get_anime_titles():
             anime_titles.append(report["name"])
 
     return anime_titles
+
+
+def create_dataframe_from_animeinfo(items):
+
+    names, release_dates, ratings = [], [], []
+
+    for item in items:
+        names.append(item.name)
+        release_dates.append(item.release_date)
+        ratings.append(item.rating)
+
+    df = pd.DataFrame(list(zip(names, release_dates, ratings)), columns=["name", "release_date", "rating"])
+
+    df["rating"] = df["rating"].str.replace('\n', '')
+
+    return df
+
+def write_data_to_file(items):
+    with open("animeinfodata.csv", 'w', encoding="UTF-16") as file:
+        for item in items:
+            file.write(f"{item.name};{item.release_date};{item.rating}\n")
+
+
+def get_data_from_file():
+
+    animes = []
+
+    with open("animeinfodata.csv", 'r', encoding="UTF-16") as file:
+
+        for x in file:
+            data = x.split(';')
+
+            item = AnimeInfo(data[0], data[2], data[1])
+
+            animes.append(item)
+
+    return animes
