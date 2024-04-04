@@ -75,6 +75,8 @@ def get_new_data_from_api(items):
 
     print("#### Batching completed ####")
 
+    write_data_to_file(animes)
+
     return animes
 
 
