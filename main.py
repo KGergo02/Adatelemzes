@@ -9,4 +9,6 @@ anime_titles = get_anime_titles()
 
 anime_infos = get_data_from_file()
 
-print(anime_infos)
+df = create_dataframe_from_animeinfo(anime_infos)
+
+print(df)
