@@ -53,10 +53,11 @@ def get_new_data_from_api(items):
 
                 anime_ratings = anime["ratings"]["@weighted_score"]
 
-                for info in anime["info"]:
-                    if "@type" in info and info["@type"] == "Vintage":
-                        anime_release_date = info["#text"]
-                        break
+                if "info" in anime:
+                    for info in anime["info"]:
+                        if "@type" in info and info["@type"] == "Vintage":
+                            anime_release_date = info["#text"]
+                            break
 
                 current_anime = AnimeInfo(anime_name, anime_ratings, anime_release_date)
 
