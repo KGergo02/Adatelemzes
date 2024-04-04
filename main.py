@@ -1,3 +1,4 @@
+import pandas as pd
 from functions_for_animes import *
 
 anime_titles = get_anime_titles()
