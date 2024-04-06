@@ -1,6 +1,6 @@
-import pandas as pd
+import requests
 from functions_for_animes import *
-import matplotlib.pyplot as plt
+
 
 anime_titles = get_anime_titles()
 
@@ -9,39 +9,29 @@ anime_titles = get_anime_titles()
 anime_infos = get_data_from_file()
 
 df = create_dataframe_from_animeinfo(anime_infos)
-df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
 
-covid_filter_df = df[df["release_date"].dt.year.between(2020, 2022)]
-covid_filter_df.loc[:, "rating"] = pd.to_numeric(covid_filter_df["rating"], errors="coerce")
-covid_avarage = covid_filter_df["rating"].mean()
-print("COVID átlag:", covid_avarage)
+create_plot_rating(df)
 
-pre_covid_filter_df = df[df["release_date"].dt.year.lt(2020)]
-pre_covid_filter_df.loc[:, "rating"] = pd.to_numeric(pre_covid_filter_df["rating"], errors = "coerce")
-pre_covid_avarage = pre_covid_filter_df["rating"].mean()
-print("Pre-COVID átlag:", pre_covid_avarage)
-
-post_covid_filter_df = df[df["release_date"].dt.year.gt(2022)]
-post_covid_filter_df.loc[:, "rating"] = pd.to_numeric(post_covid_filter_df["rating"], errors = "coerce")
-post_covid_avarage = post_covid_filter_df["rating"].mean()
-print("Post-COVID átlag:", post_covid_avarage)
-
-
-
-
-average_ratings = [pre_covid_avarage, covid_avarage, post_covid_avarage]
-periods = ['Pre-COVID', 'COVID', 'Post-COVID']
-
-
-plt.bar(periods, average_ratings, color=['blue', 'orange', 'green'])
-plt.title('Átlagos értékelés COVID előtt, alatt és után')
-plt.xlabel('Időszak')
-plt.ylabel('Átlagos értékelés')
-plt.show()
-  
-         
-
-
-
-                           
+# bearer_token = "AAAAAAAAAAAAAAAAAAAAALm%2FtAEAAAAAZgtGWTGCIdIEVYicpCWj2v47ghI%3DU8W5eoR2qbnzPf6gQSWOdkPx6T9ox6TRVuRrGrus4aUXSiOyX2"
+#
+# hashtag = "#anime"
+#
+# url = "https://api.twitter.com/2/tweets/search/recent"
+#
+# params = {
+#     'query': hashtag,
+#     'tweet.fields': 'created_at'
+# }
+#
+# headers = {
+#     "Authorization": f"Bearer {bearer_token}",
+#     "User-Agent": "v2FilteredStreamPython"
+# }
+#
+# response = requests.request("GET", url, headers=headers, params=params)
+#
+# if response.status_code != 200:
+#     raise Exception(response.status_code, response.text)
+#
+# print(response.json())
 
