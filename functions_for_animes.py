@@ -157,8 +157,14 @@ def create_plot_rating(df):
     average_ratings = [pre_covid_avarage, covid_avarage, post_covid_avarage]
     periods = ['Pre-COVID', 'COVID', 'Post-COVID']
 
-    plt.bar(periods, average_ratings, color=['blue', 'orange', 'green'])
+    bars = plt.bar(periods, average_ratings, color=['blue', 'orange', 'green'])
+
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, yval + 0.01, round(yval, 2), ha='center', va='bottom')  # Új sor
+
     plt.title('Átlagos értékelés COVID előtt, alatt és után')
     plt.xlabel('Időszak')
     plt.ylabel('Átlagos értékelés')
+    plt.ylim(5, 7)
     plt.show()
