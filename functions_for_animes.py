@@ -5,6 +5,7 @@ import xmltodict
 from anime_info import AnimeInfo
 import matplotlib.pyplot as plt
 
+
 def get_new_data_from_api(items):
     """
     Feltölt, majd visszaad egy listát animék adataival. Az adatokat az Anime News Network API biztosítja.
