@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 import time
 import requests
@@ -10,7 +12,7 @@ def get_new_data_from_api(items):
     """
     Feltölt, majd visszaad egy listát animék adataival. Az adatokat az Anime News Network API biztosítja.
 
-    :param items: Lista animék neveivel
+    :param items: Lista animék azonosítóival
 
     :returns: Új lista, amiben AnimeInfo típusú objectek vannak
     """
@@ -24,6 +26,8 @@ def get_new_data_from_api(items):
 
     ct = 1
 
+    open("animeinfodata.json", 'w', encoding="UTF-16").close()
+
     while len(items) > 0:
 
         if len(items) < 50:
@@ -32,7 +36,7 @@ def get_new_data_from_api(items):
         batch = items[:step]
 
         for item in batch:
-            query_string += f"title=~{item}&"
+            query_string += f"anime={item}&"
 
         query_string = query_string[:len(query_string) - 1]
 
@@ -42,27 +46,51 @@ def get_new_data_from_api(items):
 
         for anime in anime_infos["ann"]["anime"]:
 
-            anime_name = "None"
+            anime_id = anime.get("@id")
 
-            anime_ratings = "NaN"
+            anime_name = anime.get("@name")
 
-            anime_release_date = "None"
+            anime_rating = "NA"
+
+            anime_release_date = "NA"
+
+            anime_news = []
+
+            anime_genres = []
+
+            anime_themes = []
 
             if "ratings" in anime:
 
-                anime_name = anime["@name"]
+                anime_rating = anime["ratings"]["@weighted_score"]
 
-                anime_ratings = anime["ratings"]["@weighted_score"]
-
-                if "info" in anime:
+            if 'info' in anime:
+                if isinstance(anime["info"], list):
                     for info in anime["info"]:
-                        if "@type" in info and info["@type"] == "Vintage":
+                        if info["@type"] == "Vintage":
                             anime_release_date = info["#text"]
-                            break
+                        if info["@type"] == "Genres":
+                            anime_genres.append(info["#text"])
+                        if info["@type"] == "Themes":
+                            anime_themes.append(info["#text"])
+                else:
+                    if anime["info"]["@type"] == "Vintage":
+                        anime_release_date = anime["info"]["#text"]
+                    if anime["info"]["@type"] == "Genres":
+                        anime_genres.append(anime["info"]["#text"])
+                    if anime["info"]["@type"] == "Themes":
+                        anime_themes.append(anime["info"]["#text"])
 
-                current_anime = AnimeInfo(anime_name, anime_ratings, anime_release_date)
+            if "news" in anime:
+                if isinstance(anime["news"], list):
+                    for news in anime["news"]:
+                        anime_news.append(news["#text"])
+                else:
+                    anime_news.append(anime["news"]["#text"])
 
-                animes.append(current_anime)
+            current_anime = AnimeInfo(anime_id, anime_name, anime_rating, anime_release_date, anime_news, anime_genres, anime_themes)
+
+            animes.append(current_anime)
 
         print(f"#### Batch #{ct} complete ####")
 
@@ -81,26 +109,25 @@ def get_new_data_from_api(items):
     return animes
 
 
-def get_anime_titles():
+def get_anime_ids():
     """
-    Visszaadja az összes animének a nevét, ami megtalálható a weboldalon (Anime News Network)
+    Visszaadja az összes animének az id-jét, ami megtalálható a weboldalon (Anime News Network)
 
-    :return: Új lista, amiben animék nevei szerepelnek
+    :return: Új lista, amiben animék azonosítói szerepelnek
     """
     res = requests.get("https://cdn.animenewsnetwork.com/encyclopedia/reports.xml?id=155&type=anime&nlist=all")
 
     reports_dict = xmltodict.parse(res.content)
 
-    anime_titles = []
+    anime_ids = []
 
     for report in reports_dict["report"]["item"]:
-        if report["name"] not in anime_titles:
-            anime_titles.append(report["name"])
+        anime_ids.append(int(report["id"]))
 
-    return anime_titles
+    return anime_ids
 
 
-def create_dataframe_from_animeinfo(items):
+def create_dataframe_from_model(items):
 
     names, release_dates, ratings = [], [], []
 
@@ -115,23 +142,20 @@ def create_dataframe_from_animeinfo(items):
 
     return df
 
+
 def write_data_to_file(items):
-    with open("animeinfodata.csv", 'w', encoding="UTF-16") as file:
-        for item in items:
-            file.write(f"{item.name};{item.release_date};{item.rating}\n")
+    with open("animeinfodata.json", 'w', encoding="UTF-16") as file:
+        json.dump([anime.to_dict() for anime in items], file, ensure_ascii=False, indent=4)
 
 
 def get_data_from_file():
-
     animes = []
 
-    with open("animeinfodata.csv", 'r', encoding="UTF-16") as file:
+    with open("animeinfodata.json", 'r', encoding="UTF-16") as file:
+        data = json.load(file)
 
-        for x in file:
-            data = x.split(';')
-
-            item = AnimeInfo(data[0], data[2], data[1])
-
+        for anime in data:
+            item = AnimeInfo(anime["id"], anime["name"], anime["rating"], anime["release_date"], anime["news"], anime["genres"], anime["themes"])
             animes.append(item)
 
     return animes
