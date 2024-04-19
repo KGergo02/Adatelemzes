@@ -1,12 +1,13 @@
 class AnimeInfo:
-    def __init__(self, id, name, rating, release_date, news, genres, themes):
+    def __init__(self, id, name, rating, release_date, news, genres, themes, related):
         self.id = id
         self.name = name
         self.rating = rating
-        self.release_date = release_date
+        self.release_date = release_date[0:10]
         self.news = news
         self.genres = genres
         self.themes = themes
+        self.related = related
 
     def to_dict(self):
         return {
@@ -16,7 +17,8 @@ class AnimeInfo:
             'release_date': self.release_date,
             'news': self.news,
             'genres': self.genres,
-            'themes': self.themes
+            'themes': self.themes,
+            'related': self.related,
         }
 
     def get_news_count(self):
