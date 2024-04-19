@@ -1,5 +1,4 @@
 import json
-
 import pandas as pd
 import time
 import requests
@@ -46,7 +45,7 @@ def get_new_data_from_api(items):
 
         for anime in anime_infos["ann"]["anime"]:
 
-            anime_id = anime.get("@id")
+            anime_id = int(anime.get("@id"))
 
             anime_name = anime.get("@name")
 
@@ -60,8 +59,33 @@ def get_new_data_from_api(items):
 
             anime_themes = []
 
-            if "ratings" in anime:
+            related_animes = []
 
+            if "related-prev" in anime:
+                if isinstance(anime["related-prev"], dict):
+                    rel = anime["related-prev"]["@rel"]
+
+                    if rel == "remake of":
+                        anime_id = int(anime["related-prev"]["@id"])
+                    if rel != "adapted from":
+                        if anime["related-prev"]["@id"] != anime_id:
+                            related_animes.append(int(anime["related-prev"]["@id"]))
+                else:
+                    for rel in anime["related-prev"]:
+                        if rel["@rel"] == "remake of":
+                            anime_id = int(rel["@id"])
+                        if rel["@rel"] != "adapted from":
+                            if rel["@id"] != anime_id:
+                                related_animes.append(int(rel["@id"]))
+
+            if "related-next" in anime:
+                if isinstance(anime["related-next"], dict):
+                    related_animes.append(int(anime["related-next"]["@id"]))
+                else:
+                    for rel in anime["related-next"]:
+                        related_animes.append(int(rel["@id"]))
+
+            if "ratings" in anime:
                 anime_rating = anime["ratings"]["@weighted_score"]
 
             if 'info' in anime:
@@ -88,7 +112,8 @@ def get_new_data_from_api(items):
                 else:
                     anime_news.append(anime["news"]["#text"])
 
-            current_anime = AnimeInfo(anime_id, anime_name, anime_rating, anime_release_date, anime_news, anime_genres, anime_themes)
+            current_anime = AnimeInfo(anime_id, anime_name, anime_rating, anime_release_date, anime_news, anime_genres,
+                                      anime_themes, related_animes)
 
             animes.append(current_anime)
 
@@ -128,19 +153,69 @@ def get_anime_ids():
 
 
 def create_dataframe_from_model(items):
-
-    names, release_dates, ratings = [], [], []
+    names, release_dates, ratings, related_news_appearances = [], [], [], []
 
     for item in items:
+        related_news_appearances.append(item.get_news_count() + count_anime_related_news_appearances(item, items, item.related))
         names.append(item.name)
         release_dates.append(item.release_date)
         ratings.append(item.rating)
 
-    df = pd.DataFrame(list(zip(names, release_dates, ratings)), columns=["name", "release_date", "rating"])
+    df = pd.DataFrame(list(zip(names, release_dates, ratings, related_news_appearances)),
+                      columns=["name",
+                               "release_date",
+                               "rating",
+                               "news_sum",
+                               ])
+
+    # pd.set_option('display.max_columns', None)
+
+    pd.set_option('display.max_rows', None)
 
     df["rating"] = df["rating"].str.replace('\n', '')
 
     return df
+
+
+def count_anime_related_news_appearances(anime, animes, ids):
+
+    id_set = set(ids)
+
+    if len(ids) == 0:
+        return 0
+
+    current_animes = [item for item in animes if item.id in id_set]
+
+    for item in current_animes:
+        item_id_set = set(item.related)
+        id_set = id_set | item_id_set
+
+    selected_animes = set([item for item in animes if item.id in id_set])
+
+    selected_animes.add(anime)
+
+    id_set.clear()
+
+    news_sum = 0
+
+    title = anime.name
+
+    min_id = min([int(item.id) for item in selected_animes])
+
+    if anime.id < min_id:
+        title = anime.name
+    else:
+        for item in selected_animes:
+            if item.id == min_id:
+                title = item.name
+
+    anime.name = title
+
+    for anime in selected_animes:
+        news_sum += anime.get_news_count()
+        animes.remove(anime)
+
+    return news_sum
 
 
 def write_data_to_file(items):
@@ -155,7 +230,8 @@ def get_data_from_file():
         data = json.load(file)
 
         for anime in data:
-            item = AnimeInfo(anime["id"], anime["name"], anime["rating"], anime["release_date"], anime["news"], anime["genres"], anime["themes"])
+            item = AnimeInfo(anime["id"], anime["name"], anime["rating"], anime["release_date"], anime["news"],
+                             anime["genres"], anime["themes"], anime["related"])
             animes.append(item)
 
     return animes
