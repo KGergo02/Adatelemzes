@@ -15,4 +15,4 @@ if __name__ == '__main__':
 
     print(df)
 
-    create_plot_rating(df)
+    # create_plot_rating(df)
