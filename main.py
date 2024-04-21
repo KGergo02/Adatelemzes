@@ -1,5 +1,4 @@
 from functions_for_animes import *
-import numpy as np
 
 if __name__ == '__main__':
 
@@ -16,4 +15,4 @@ if __name__ == '__main__':
 
     print(df)
 
-    # create_plot_rating(df)
+    create_plot_rating(df)
