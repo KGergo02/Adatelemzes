@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 import pandas as pd
 import time
 import requests
@@ -168,7 +169,7 @@ def create_dataframe_from_model(items):
                                "news_sum",
                                ])
 
-    # pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_columns', None)
 
     pd.set_option('display.max_rows', None)
 
@@ -180,6 +181,8 @@ def create_dataframe_from_model(items):
 def count_anime_related_news_appearances(anime, animes, ids):
 
     id_set = set(ids)
+
+    replace_useless_date(anime)
 
     if len(ids) == 0:
         return 0
@@ -202,20 +205,60 @@ def count_anime_related_news_appearances(anime, animes, ids):
 
     min_id = min([int(item.id) for item in selected_animes])
 
+    ratings = 0.0
+
+    rating_counter = 0.0
+
+    if anime.release_date != "NA":
+        min_date = datetime.strptime(str(anime.release_date), determine_datetime_format(str(anime.release_date)))
+    else:
+        min_date = datetime.strptime("9999-12-31", "%Y-%m-%d")
+
     if anime.id < min_id:
         title = anime.name
     else:
         for item in selected_animes:
+            replace_useless_date(item)
+            if item.rating != "NA":
+                ratings += float(item.rating)
+                rating_counter += 1.0
             if item.id == min_id:
                 title = item.name
+            if item.release_date != "NA" and datetime.strptime(item.release_date, determine_datetime_format(str(item.release_date))) < min_date:
+                min_date = datetime.strptime(item.release_date, determine_datetime_format(str(item.release_date)))
+
+    anime.release_date = str(min_date)[0:9]
 
     anime.name = title
+
+    if rating_counter != 0:
+        anime.rating = str(float(ratings / rating_counter))
+    else:
+        anime.rating = "0.0"
 
     for anime in selected_animes:
         news_sum += anime.get_news_count()
         animes.remove(anime)
 
     return news_sum
+
+
+def determine_datetime_format(date):
+
+    if len(date.split("-")) == 3:
+        return "%Y-%m-%d"
+    elif len(date.split("-")) == 2:
+        return "%Y-%m"
+    elif len(date.split("-")) == 1:
+        return "%Y"
+
+
+def replace_useless_date(anime):
+    if "(" in anime.release_date:
+        anime.release_date = str.strip(anime.release_date.split("(")[0])
+    if "to" in anime.release_date:
+        anime.release_date = str.strip(anime.release_date.split("to")[0])
+    return anime.release_date
 
 
 def write_data_to_file(items):

@@ -2,7 +2,6 @@ from functions_for_animes import *
 import matplotlib.pyplot as plt
 
 
-
 if __name__ == '__main__':
 
     # ids = get_anime_ids()
@@ -18,7 +17,7 @@ if __name__ == '__main__':
 
     print(df)
 
-    
+
     
     df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
     df['year'] = df['release_date'].dt.year
