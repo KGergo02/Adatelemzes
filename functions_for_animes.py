@@ -169,7 +169,7 @@ def create_dataframe_from_model(items):
                                "news_sum",
                                ])
 
-    pd.set_option('display.max_columns', None)
+    # pd.set_option('display.max_columns', None)
 
     pd.set_option('display.max_rows', None)
 
