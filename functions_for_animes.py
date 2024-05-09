@@ -154,18 +154,25 @@ def get_anime_ids():
 
 
 def create_dataframe_from_model(items):
-    names, release_dates, ratings, related_news_appearances = [], [], [], []
+    names, release_dates, ratings, related_news_appearances, news, genres, themes = [], [], [], [], [], [], []
 
     for item in items:
-        related_news_appearances.append(item.get_news_count() + count_anime_related_news_appearances(item, items, item.related))
+        news_sum, news_var, genres_var, themes_var = count_anime_related_news_appearances(item, items, item.related)
+        news.append(news_var)
+        genres.append(genres_var)
+        themes.append(themes_var)
+        related_news_appearances.append(item.get_news_count() + news_sum)
         names.append(item.name)
         release_dates.append(item.release_date)
         ratings.append(item.rating)
 
-    df = pd.DataFrame(list(zip(names, release_dates, ratings, related_news_appearances)),
+    df = pd.DataFrame(list(zip(names, release_dates, ratings, news, genres, themes, related_news_appearances)),
                       columns=["name",
                                "release_date",
                                "rating",
+                               "news",
+                               "genres",
+                               "themes",
                                "news_sum",
                                ])
 
@@ -185,7 +192,13 @@ def count_anime_related_news_appearances(anime, animes, ids):
     replace_useless_date(anime)
 
     if len(ids) == 0:
-        return 0
+        return 0, set(), set(), set()
+
+    news = set(anime.news)
+
+    genres = set(anime.genres)
+
+    themes = set(anime.themes)
 
     current_animes = [item for item in animes if item.id in id_set]
 
@@ -198,8 +211,6 @@ def count_anime_related_news_appearances(anime, animes, ids):
     selected_animes.add(anime)
 
     id_set.clear()
-
-    news_sum = 0
 
     title = anime.name
 
@@ -237,10 +248,19 @@ def count_anime_related_news_appearances(anime, animes, ids):
         anime.rating = "0.0"
 
     for anime in selected_animes:
-        news_sum += anime.get_news_count()
+
+        if len(anime.news) != 0:
+            news = news.union(set(anime.news))
+
+        if len(anime.genres) != 0:
+            genres = genres.union(set(anime.genres))
+
+        if len(anime.themes) != 0:
+            themes = themes.union(set(anime.themes))
+
         animes.remove(anime)
 
-    return news_sum
+    return len(news), news, genres, themes
 
 
 def determine_datetime_format(date):
