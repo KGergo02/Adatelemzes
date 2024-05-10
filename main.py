@@ -2,7 +2,7 @@ from functions_for_animes import *
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 from wordcloud import WordCloud
-
+from bs4 import BeautifulSoup
 
 if __name__ == '__main__':
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     
     
     
-    """""
+    
     df['anime_age'] = 2024 - df['release_date'].dt.year
     
     plt.rc('font', **font) 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     plt.title('HÍREK SZÁMA AZ ELMÚLT 10 ÉVBEN', fontweight = 'bold', fontsize = 15)
     plt.grid(False)
     plt.show()
-    """""
+    
 
     
     theme_counts = df['themes'].explode().value_counts()
@@ -131,9 +131,10 @@ if __name__ == '__main__':
     plt.show()
     
     
-    all_news = ' '.join(str(news) for news in df['news'])   
-    wordcloud = WordCloud(max_words=50, max_font_size=100, min_font_size=10, prefer_horizontal=0.8, background_color='black').generate(all_news)
-    plt.figure(figsize=(10, 5), facecolor='black')
+    all_news = ' '.join(str(news) for news in df['news']) 
+    stopwords = ['cite', 'Cite']  
+    wordcloud = WordCloud(max_words=50, max_font_size=100, min_font_size=10, prefer_horizontal=0.8, background_color='black', stopwords=stopwords).generate(all_news)
+    plt.figure(figsize=(12, 6), facecolor='black')
     plt.imshow(wordcloud, interpolation='bilinear')
     
     plt.axis('off')
