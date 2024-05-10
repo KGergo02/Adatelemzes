@@ -19,8 +19,8 @@ if __name__ == '__main__':
     print(df)
 
     
-
-
+    
+   
     font = {'family': 'sans-serif',
             'weight': 'bold',
             'size': 12}
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     plt.show()
     
 
-    
+
 
     
 
