@@ -16,9 +16,10 @@ if __name__ == '__main__':
 
     df = df.sort_values(by="news_sum", ascending=False)
 
-    #print(df)
+    print(df)
 
     
+
 
     font = {'family': 'sans-serif',
             'weight': 'bold',
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     
     
     
-    """""
+    
     df['anime_age'] = 2024 - df['release_date'].dt.year
     
     plt.rc('font', **font) 
@@ -43,12 +44,12 @@ if __name__ == '__main__':
     plt.ylabel('HÍREK SZÁMA', fontweight = 'bold')
     plt.grid(True)
     plt.show()
-    """""
-
     
 
     
-    """""
+
+    
+
     df['rating'] = pd.to_numeric(df['rating'], errors='coerce')
     top_10_rating = df.nlargest(10, 'rating')
 
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     plt.grid(False)
     plt.tight_layout()
     plt.show()
-    """""
+    
     
     
     
@@ -79,17 +80,20 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
     
+
+
     df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
     df['year'] = df['release_date'].dt.year
     news_per_year = df.groupby('year')['news_sum'].sum()
     
 
     
-    df.dropna(inplace=True)
+    
     highest_rated_anime = df[df['rating'] == df['rating'].max()]
+
     
     
-    """""
+   
     df['year'] = df['release_date'].dt.year
     df_10_years = df.groupby('year')['news_sum'].sum().tail(10)
     
@@ -98,21 +102,23 @@ if __name__ == '__main__':
     plt.title('HÍREK SZÁMA AZ ELMÚLT 10 ÉVBEN', fontweight = 'bold', fontsize = 15)
     plt.grid(False)
     plt.show()
-    """""
     
     
-   
-
-   
-
 
     
+
+
+
+
+
+
     
-   
+
+
+
     
-     
-      
- 
+
+
     
     
     # create_plot_rating(df)
