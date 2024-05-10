@@ -46,12 +46,12 @@ if __name__ == '__main__':
     plt.grid(True)
     plt.grid(color = 'red', alpha = 0.2)
     plt.show()
-    """""
+    
 
 
 
     
-    """""
+    
     df['rating'] = pd.to_numeric(df['rating'], errors='coerce')
     top_10_rating = df.nlargest(10, 'rating')
 
@@ -65,11 +65,11 @@ if __name__ == '__main__':
     plt.grid(False)
     plt.tight_layout()
     plt.show()
-    """""
     
     
     
-    """""
+    
+    
     top_10_news = df.nlargest(10, 'news_sum')
     
     
@@ -92,10 +92,10 @@ if __name__ == '__main__':
     
     
     highest_rated_anime = df[df['rating'] == df['rating'].max()]
-    """""
     
     
-    """""
+    
+    
     df['year'] = df['release_date'].dt.year
     df_10_years = df.groupby('year')['news_sum'].sum().tail(10)
     
@@ -106,41 +106,43 @@ if __name__ == '__main__':
     plt.show()
     """""
 
-    """""
+    
     theme_counts = df['themes'].explode().value_counts()
     top_10_themes = theme_counts.head(10)
     plt.figure(figsize=(10, 6))
     plt.scatter(top_10_themes.index, top_10_themes.values, s=100, color='green')
     plt.title('LEGGYAKORIBB TÉMÁK', fontweight='bold', fontsize=15)
-    plt.yticks(range(0, 211, 10))
+    plt.yticks(range(0, max(top_10_themes.values) + 5, 5))
     plt.grid(True)
     plt.grid(color = 'green', alpha = 0.3)
     plt.tight_layout()
     plt.show()
 
-
+    
     genre_counts = df['genres'].explode().value_counts()
     top_10_genres = genre_counts.head(10)
     plt.figure(figsize=(10, 6))
     plt.scatter( top_10_genres.index,  top_10_genres.values, s=100, color='blue')    
     plt.title('LEGGYAKORIBB MŰFAJOK', fontweight='bold', fontsize=15)
-    plt.yticks(range(0, 1001, 100))
+    plt.yticks(range(0, max(top_10_genres.values) +50, 50))
     plt.grid(True)
     plt.grid(color = 'blue', alpha = 0.3)
     plt.tight_layout()
     plt.show()
-    """""
-
+    
+    
     all_news = ' '.join(str(news) for news in df['news'])   
     wordcloud = WordCloud(max_words=50, max_font_size=100, min_font_size=10, prefer_horizontal=0.8, background_color='black').generate(all_news)
-    
-
-    
     plt.figure(figsize=(10, 5), facecolor='black')
     plt.imshow(wordcloud, interpolation='bilinear')
-    plt.title('WORDCLOUD A HÍREK ALAPJÁN', fontsize=20, fontweight = 'black')
+    
     plt.axis('off')
     plt.show()
     
-    
+
+
+
+
+
+
     # create_plot_rating(df)
