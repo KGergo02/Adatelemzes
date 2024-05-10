@@ -16,11 +16,11 @@ if __name__ == '__main__':
 
     df = df.sort_values(by="news_sum", ascending=False)
 
-    print(df)
+    #print(df)
 
     
     
-   
+    """""
     font = {'family': 'sans-serif',
             'weight': 'bold',
             'size': 12}
@@ -43,6 +43,7 @@ if __name__ == '__main__':
     plt.xlabel('ANIME KORA', fontweight = 'bold')
     plt.ylabel('HÍREK SZÁMA', fontweight = 'bold')
     plt.grid(True)
+    plt.grid(color = 'red', alpha = 0.2)
     plt.show()
     
 
@@ -90,7 +91,7 @@ if __name__ == '__main__':
     
     
     highest_rated_anime = df[df['rating'] == df['rating'].max()]
-
+    
     
     
    
@@ -102,17 +103,31 @@ if __name__ == '__main__':
     plt.title('HÍREK SZÁMA AZ ELMÚLT 10 ÉVBEN', fontweight = 'bold', fontsize = 15)
     plt.grid(False)
     plt.show()
-    
-    
-
-    
+    """""
 
 
+    theme_counts = df['themes'].explode().value_counts()
+    top_10_themes = theme_counts.head(10)
+    plt.figure(figsize=(10, 6))
+    plt.scatter(top_10_themes.index, top_10_themes.values, s=100, color='green')
+    plt.title('LEGGYAKORIBB TÉMÁK', fontweight='bold', fontsize=15)
+    plt.yticks(range(0, 211, 10))
+    plt.grid(True)
+    plt.grid(color = 'green', alpha = 0.3)
+    plt.tight_layout()
+    plt.show()
 
 
-
-
-    
+    genre_counts = df['genres'].explode().value_counts()
+    top_10_genres = genre_counts.head(10)
+    plt.figure(figsize=(10, 6))
+    plt.scatter( top_10_genres.index,  top_10_genres.values, s=100, color='blue')    
+    plt.title('LEGGYAKORIBB MŰFAJOK', fontweight='bold', fontsize=15)
+    plt.yticks(range(0, 1001, 100))
+    plt.grid(True)
+    plt.grid(color = 'blue', alpha = 0.3)
+    plt.tight_layout()
+    plt.show()
 
 
 
