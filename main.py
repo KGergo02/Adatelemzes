@@ -17,17 +17,17 @@ if __name__ == '__main__':
 
     df = df.sort_values(by="news_sum", ascending=False)
 
-    #print(df)
+    print(df)
 
     
     
-    #font preset ha szükséges
+    #font preset ha szükséges.
     font = {'family': 'sans-serif',
             'weight': 'bold',
             'size': 12}
 
-    #Ha véletlen valami rossz adat lenne a ratingbe, átalakítjuk számokká és ha hiba lépne fel a folyamatban, azt helyettesítjük NaN-rel, amiket később kidobunk
-    #A release_date oszlopot dátum - idő objektumokká konvertáljuk, hasonlóan a ratinghez, itt is a hibás konverziót NaN-rel helyettesítjük, majd azokat kidobjuk
+    #Ha véletlen valami rossz adat lenne a ratingbe, átalakítjuk számokká és ha hiba lépne fel a folyamatban, azt helyettesítjük NaN-rel, amiket később kidobunk.
+    #A release_date oszlopot dátum - idő objektumokká konvertáljuk, hasonlóan a ratinghez, itt is a hibás konverziót NaN-rel helyettesítjük, majd azokat kidobjuk.
     #Ez azért kell, hogy birjunk jó típusú adatokkal dolgozni az elemzés közben   
     df['rating'] = pd.to_numeric(df['rating'], errors='coerce')
     df.dropna(subset=['rating'], inplace=True)
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     df['anime_age'] = 2024 - df['release_date'].dt.year
     
 
-    #Szórásdiagramot hozunk létre, ami az animé korának és a kapott hírek számának összefüggését ábrázolja
+    #Szórásdiagramot hozunk létre, ami az animé korának és a kapott hírek számának összefüggését ábrázolja.
     #Különböző paramétereket állítunk be, a vizualizálás érdekében, ami minden további plotra is igaz.
     plt.rc('font', **font) 
     plt.figure(figsize=(8, 12),)
@@ -59,6 +59,7 @@ if __name__ == '__main__':
     
     
     df['rating'] = pd.to_numeric(df['rating'], errors='coerce')
+    #nlargest függvény segítségével kiálasztjuk a 10 legjobban értékelt animéket, amit ábrázoltatunk egy barploton, kimutatva az animék nevét és a ratingjüket.     
     top_10_rating = df.nlargest(10, 'rating')
 
     plt.rc('font', **font) 
@@ -75,7 +76,7 @@ if __name__ == '__main__':
     
     
     
-    
+    #Ezt a kapott hírek számával is megcsináljuk, hogy kimutassuk, hogy attól, hogy egy animé legjobb értékelésű, még nem biztos, hogy a legtöbb hírt is kap (haterek).
     top_10_news = df.nlargest(10, 'news_sum')
     
     
@@ -96,12 +97,13 @@ if __name__ == '__main__':
     
 
     
-    
+    #Ezek csak double-checkek
     highest_rated_anime = df[df['rating'] == df['rating'].max()]
     
     
     
-    
+    #Kinyerjük a release_dateből az éveket, és minden évre, összeszámoljuk a kapott hírek számát, majd ábrázoljuk egy barploton.
+    #Itt jól látszik pl. hogy még csak a 2024 - es év felében vagyunk, vagy hogy 2020-2022-ig nem animével  foglalkozott a média, hanem a pandémiával.
     df['year'] = df['release_date'].dt.year
     df_10_years = df.groupby('year')['news_sum'].sum().tail(10)
     
@@ -112,7 +114,8 @@ if __name__ == '__main__':
     plt.show()
     
 
-    
+    #A themes listákat az explode() metódus segítségével szétbontjuk, így minden egyedi téma külön sort kap.
+    #Összeszámoljuk, hogy miből mennyi van és a leggyakoribb témákat kimutassuk.
     theme_counts = df['themes'].explode().value_counts()
     top_10_themes = theme_counts.head(10)
     plt.figure(figsize=(10, 6))
@@ -124,7 +127,7 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
 
-    
+     #Hasonlóan a themeshez, ezt is úgy csináljuk, mivel ez is listában van
     genre_counts = df['genres'].explode().value_counts()
     top_10_genres = genre_counts.head(10)
     plt.figure(figsize=(10, 6))
@@ -136,7 +139,11 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
     
-    
+     #Végére, egy worldclouddal ábrázoltatjuk a leggyakrabban előforduló szavakat a news reportokban, hogy belátást nyerjünk, hogy valóban mit is publikálnak a hírekben.
+     #Az összes news oszlopot - ami könkrét híreket tartalma -  összeláncoljuk, majd a join() függvény segítségével szóközzel elválasztjuk őket.
+     #Stopwordként berakjuk a cite-ot ami egy xml kiterjesztés, ezért nem kell szennyezze a wordcloudunkat.
+     
+
     all_news = ' '.join(str(news) for news in df['news']) 
     stopwords = ['cite', 'Cite']  
     wordcloud = WordCloud(max_words=50, max_font_size=100, min_font_size=10, prefer_horizontal=0.8, background_color='black', stopwords=stopwords).generate(all_news)
@@ -152,4 +159,4 @@ if __name__ == '__main__':
 
 
 
-    # create_plot_rating(df)
+    
