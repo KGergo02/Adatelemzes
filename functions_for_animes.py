@@ -62,6 +62,8 @@ def get_new_data_from_api(items):
 
             related_animes = []
 
+            # animék előző szezonjainak az azonosítóikat kigyűjtjük az alábbi kóddal
+
             if "related-prev" in anime:
                 if isinstance(anime["related-prev"], dict):
                     rel = anime["related-prev"]["@rel"]
@@ -79,6 +81,8 @@ def get_new_data_from_api(items):
                             if rel["@id"] != anime_id:
                                 related_animes.append(int(rel["@id"]))
 
+            # animék következő szezonjainak az azonosítóikat kigyűjtjük az alábbi kóddal
+
             if "related-next" in anime:
                 if isinstance(anime["related-next"], dict):
                     related_animes.append(int(anime["related-next"]["@id"]))
@@ -86,8 +90,12 @@ def get_new_data_from_api(items):
                     for rel in anime["related-next"]:
                         related_animes.append(int(rel["@id"]))
 
+            # értékelések kigyűjtése
+
             if "ratings" in anime:
                 anime_rating = anime["ratings"]["@weighted_score"]
+
+            # kiadási dátum, műfajok és témák kigyűjtése
 
             if 'info' in anime:
                 if isinstance(anime["info"], list):
@@ -106,12 +114,16 @@ def get_new_data_from_api(items):
                     if anime["info"]["@type"] == "Themes":
                         anime_themes.append(anime["info"]["#text"])
 
+            # konkrét hírek kigyűjtése
+
             if "news" in anime:
                 if isinstance(anime["news"], list):
                     for news in anime["news"]:
                         anime_news.append(news["#text"])
                 else:
                     anime_news.append(anime["news"]["#text"])
+
+            # modellt készítünk belőle a könnyebb kezelhetőség érdekében
 
             current_anime = AnimeInfo(anime_id, anime_name, anime_rating, anime_release_date, anime_news, anime_genres,
                                       anime_themes, related_animes)
@@ -154,16 +166,22 @@ def get_anime_ids():
 
 
 def create_dataframe_from_model(items):
+    """
+        Dataframe-t készítünk az animék listájából. Az adatokat feldolgozzuk, megszámoljuk a hírek számát és az értékelésekből átlagot számolunk.
+        :param items: Animék listája saját modellként
+        :return: Dataframe
+        """
+
     names, release_dates, ratings, related_news_appearances, news, genres, themes = [], [], [], [], [], [], []
 
     for item in items:
-        news_sum, news_var, genres_var, themes_var = count_anime_related_news_appearances(item, items, item.related)
+        news_sum, news_var, genres_var, themes_var, date = count_anime_related_news_appearances(item, items, item.related)
         news.append(news_var)
         genres.append(genres_var)
         themes.append(themes_var)
         related_news_appearances.append(item.get_news_count() + news_sum)
         names.append(item.name)
-        release_dates.append(item.release_date)
+        release_dates.append(date)
         ratings.append(item.rating)
 
     df = pd.DataFrame(list(zip(names, release_dates, ratings, news, genres, themes, related_news_appearances)),
@@ -176,11 +194,12 @@ def create_dataframe_from_model(items):
                                "news_sum",
                                ])
 
+    # Ez az a beállítás, amivel az összes oszlop látszódik, ha kiírjuk a dataframet
     # pd.set_option('display.max_columns', None)
 
-    pd.set_option('display.max_rows', None)
+    # Ugyan az, csak sorokkal
 
-    df["rating"] = df["rating"].str.replace('\n', '')
+    pd.set_option('display.max_rows', None)
 
     return df
 
@@ -192,7 +211,10 @@ def count_anime_related_news_appearances(anime, animes, ids):
     replace_useless_date(anime)
 
     if len(ids) == 0:
-        return 0, set(), set(), set()
+        if anime.release_date != "NA":
+            return len(anime.news), set(anime.news), set(anime.genres), set(anime.themes), str(datetime.strptime(anime.release_date, determine_datetime_format(anime.release_date)))[0:10]
+        else:
+            return len(anime.news), set(anime.news), set(anime.genres), set(anime.themes), "NA"
 
     news = set(anime.news)
 
@@ -238,8 +260,6 @@ def count_anime_related_news_appearances(anime, animes, ids):
             if item.release_date != "NA" and datetime.strptime(item.release_date, determine_datetime_format(str(item.release_date))) < min_date:
                 min_date = datetime.strptime(item.release_date, determine_datetime_format(str(item.release_date)))
 
-    anime.release_date = str(min_date)[0:9]
-
     anime.name = title
 
     if rating_counter != 0:
@@ -260,7 +280,7 @@ def count_anime_related_news_appearances(anime, animes, ids):
 
         animes.remove(anime)
 
-    return len(news), news, genres, themes
+    return len(news), news, genres, themes, str(min_date)[0:10]
 
 
 def determine_datetime_format(date):
