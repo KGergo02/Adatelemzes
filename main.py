@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
 if __name__ == '__main__':
+
+    # Ezt a 2 sort commenteld ki ha szeretnél új adatokat a projekthez
     # ids = get_anime_ids()
     #
     # anime_infos = get_new_data_from_api(ids)
