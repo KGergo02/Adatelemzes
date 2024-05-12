@@ -16,6 +16,7 @@ def get_new_data_from_api(items):
 
     :returns: Új lista, amiben AnimeInfo típusú objectek vannak
     """
+
     animes = []
 
     query_string = ""
@@ -153,6 +154,7 @@ def get_anime_ids():
 
     :return: Új lista, amiben animék azonosítói szerepelnek
     """
+
     res = requests.get("https://cdn.animenewsnetwork.com/encyclopedia/reports.xml?id=155&type=anime&nlist=all")
 
     reports_dict = xmltodict.parse(res.content)
@@ -167,10 +169,10 @@ def get_anime_ids():
 
 def create_dataframe_from_model(items):
     """
-        Dataframe-t készítünk az animék listájából. Az adatokat feldolgozzuk, megszámoljuk a hírek számát és az értékelésekből átlagot számolunk.
-        :param items: Animék listája saját modellként
-        :return: Dataframe
-        """
+    Dataframe-t készítünk az animék listájából. Az adatokat feldolgozzuk, megszámoljuk a hírek számát és az értékelésekből átlagot számolunk.
+    :param items: Animék listája saját modellként
+    :return: Dataframe
+    """
 
     names, release_dates, ratings, related_news_appearances, news, genres, themes = [], [], [], [], [], [], []
 
@@ -205,11 +207,18 @@ def create_dataframe_from_model(items):
 
 
 def count_anime_related_news_appearances(anime, animes, ids):
+    """
+    :param anime: A jelenlegi anime
+    :param animes: A teljes anime lista
+    :param ids: Az összes olyan azonosító, ami tartozik a jelenlegi animéhez
+    :return: Tuple-t ad vissza, ami a hírek számából, konkrét hírekből, műfajokból, témákból és dátumokból áll.
+    """
 
     id_set = set(ids)
 
     replace_useless_date(anime)
 
+    # Ha nincs az animéhez folytatás vagy multiple season
     if len(ids) == 0:
         if anime.release_date != "NA":
             return len(anime.news), set(anime.news), set(anime.genres), set(anime.themes), str(datetime.strptime(anime.release_date, determine_datetime_format(anime.release_date)))[0:10]
@@ -228,6 +237,7 @@ def count_anime_related_news_appearances(anime, animes, ids):
         item_id_set = set(item.related)
         id_set = id_set | item_id_set
 
+    # Szűrök az id_set alapján az animes listára.
     selected_animes = set([item for item in animes if item.id in id_set])
 
     selected_animes.add(anime)
@@ -284,6 +294,11 @@ def count_anime_related_news_appearances(anime, animes, ids):
 
 
 def determine_datetime_format(date):
+    """
+    Eldönti, hogy melyik dátum formátumot kell használni a paraméterből kapott értékre.
+    :param date: Dátum
+    :return: Korrekt dátum formátum
+    """
 
     if len(date.split("-")) == 3:
         return "%Y-%m-%d"
@@ -294,6 +309,12 @@ def determine_datetime_format(date):
 
 
 def replace_useless_date(anime):
+    """
+    Kitörli a felesleges karaktereket a dátumokból
+    :param anime: Anime modell
+    :return: A módosított dátum
+    """
+
     if "(" in anime.release_date:
         anime.release_date = str.strip(anime.release_date.split("(")[0])
     if "to" in anime.release_date:
@@ -302,11 +323,22 @@ def replace_useless_date(anime):
 
 
 def write_data_to_file(items):
+    """
+    Json fileba elmenti az Anime modellt
+    :param items: Anime lista
+    :return:
+    """
+
     with open("animeinfodata.json", 'w', encoding="UTF-16") as file:
         json.dump([anime.to_dict() for anime in items], file, ensure_ascii=False, indent=4)
 
 
 def get_data_from_file():
+    """
+    Kiolvassa a json fileból az adatokat
+    :return: Animék listája
+    """
+
     animes = []
 
     with open("animeinfodata.json", 'r', encoding="UTF-16") as file:
@@ -321,6 +353,12 @@ def get_data_from_file():
 
 
 def create_plot_rating(df):
+    """
+    Animék értékeléséhez készít egy plotot, amin COVID időszakot vizsgálunk
+    :param df: Dataframe
+    :return:
+    """
+
     df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
 
     covid_filter_df = df[df["release_date"].dt.year.between(2020, 2022)]
