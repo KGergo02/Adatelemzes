@@ -17,8 +17,6 @@ if __name__ == '__main__':
 
     df = df.sort_values(by="news_sum", ascending=False)
 
-    # print(df.head(10))
-
     # font preset ha szükséges.
     font = {'family': 'sans-serif',
             'weight': 'bold',
