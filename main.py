@@ -99,7 +99,8 @@ if __name__ == '__main__':
     plt.figure(figsize=(10, 6))
     plt.scatter(top_10_themes.index, top_10_themes.values, s=100, color='green')
     plt.title('LEGGYAKORIBB TÉMÁK', fontweight='bold', fontsize=15)
-    plt.yticks(range(0, max(top_10_themes.values) + 5, 5))
+    plt.yticks(range(0, max(top_10_themes.values) + 5, 50))
+    plt.xticks(rotation = 30, fontsize = 10)
     plt.grid(True)
     plt.grid(color='green', alpha=0.3)
     plt.tight_layout()
@@ -111,7 +112,8 @@ if __name__ == '__main__':
     plt.figure(figsize=(10, 6))
     plt.scatter(top_10_genres.index, top_10_genres.values, s=100, color='blue')
     plt.title('LEGGYAKORIBB MŰFAJOK', fontweight='bold', fontsize=15)
-    plt.yticks(range(0, max(top_10_genres.values) + 50, 50))
+    plt.yticks(range(0, max(top_10_genres.values) + 50, 200))
+    plt.xticks(rotation = 30, fontsize = 10)
     plt.grid(True)
     plt.grid(color='blue', alpha=0.3)
     plt.tight_layout()
@@ -119,10 +121,10 @@ if __name__ == '__main__':
 
     # Végére, egy worldclouddal ábrázoltatjuk a leggyakrabban előforduló szavakat a news reportokban, hogy belátást nyerjünk, hogy valóban mit is publikálnak a hírekben.
     # Az összes news oszlopot - ami könkrét híreket tartalma -  összeláncoljuk, majd a join() függvény segítségével szóközzel elválasztjuk őket.
-    # Stopwordként berakjuk a cite-ot ami egy html tag, ezért nem kell szennyezze a wordcloudunkat.
+    # Stopwordként berakjuk a cite-ot, ami egy html tag, meg egyebeket, nem kell szennyezzék a wordcloudunkat.
 
     all_news = ' '.join(str(news) for news in df['news'])
-    stopwords = {'cite', 'Cite'}
+    stopwords = {'cite', 'Cite', 'site', 'of', 'the', 'i'}
     wordcloud = WordCloud(max_words=50, max_font_size=100, min_font_size=10, prefer_horizontal=0.8,
                           background_color='black', stopwords=stopwords).generate(all_news)
     plt.figure(figsize=(12, 6), facecolor='black')
