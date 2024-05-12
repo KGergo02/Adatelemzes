@@ -21,11 +21,14 @@ if __name__ == '__main__':
 
     
     
-    
+    #font preset ha szükséges
     font = {'family': 'sans-serif',
             'weight': 'bold',
             'size': 12}
 
+    #Ha véletlen valami rossz adat lenne a ratingbe, átalakítjuk számokká és ha hiba lépne fel a folyamatban, azt helyettesítjük NaN-rel, amiket később kidobunk
+    #A release_date oszlopot dátum - idő objektumokká konvertáljuk, hasonlóan a ratinghez, itt is a hibás konverziót NaN-rel helyettesítjük, majd azokat kidobjuk
+    #Ez azért kell, hogy birjunk jó típusú adatokkal dolgozni az elemzés közben   
     df['rating'] = pd.to_numeric(df['rating'], errors='coerce')
     df.dropna(subset=['rating'], inplace=True)
     df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
@@ -34,9 +37,12 @@ if __name__ == '__main__':
     
     
     
-    
+    #kiszámoljuk, hogy hány éves az animé
     df['anime_age'] = 2024 - df['release_date'].dt.year
     
+
+    #Szórásdiagramot hozunk létre, ami az animé korának és a kapott hírek számának összefüggését ábrázolja
+    #Különböző paramétereket állítunk be, a vizualizálás érdekében, ami minden további plotra is igaz.
     plt.rc('font', **font) 
     plt.figure(figsize=(8, 12),)
     plt.scatter(df['anime_age'], df['news_sum'], color='red', edgecolors='red', linewidths=5, alpha=0.7)
