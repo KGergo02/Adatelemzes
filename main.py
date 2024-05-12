@@ -141,7 +141,7 @@ if __name__ == '__main__':
     
      #Végére, egy worldclouddal ábrázoltatjuk a leggyakrabban előforduló szavakat a news reportokban, hogy belátást nyerjünk, hogy valóban mit is publikálnak a hírekben.
      #Az összes news oszlopot - ami könkrét híreket tartalma -  összeláncoljuk, majd a join() függvény segítségével szóközzel elválasztjuk őket.
-     #Stopwordként berakjuk a cite-ot ami egy xml kiterjesztés, ezért nem kell szennyezze a wordcloudunkat.
+     #Stopwordként berakjuk a cite-ot ami egy html tag, ezért nem kell szennyezze a wordcloudunkat.
      
 
     all_news = ' '.join(str(news) for news in df['news']) 
