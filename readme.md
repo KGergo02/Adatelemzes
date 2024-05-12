@@ -1,24 +1,5 @@
-<style>
-h1, h2
-{
-    color:white;
-}
 
-hr
-{
-    background-color:white;
-}
-
-h3
-{
-    color:lightgrey;
-    font-style:italic;
-}
-
-</style>
-
-<center> 
-    <h1>Adatelmezés</h1>
+<h1>Adatelmezés</h1>
 
 <hr>
 
@@ -60,24 +41,4 @@ Ez egy modell az Animékhez, amiben tároljuk az animék azonosítóját, neveit
 Ebben a fileban tároljuk az API-ból kapott adatokat. Ha nem lennének tárolva az adatok, akkor minden futás előtt körülbelül 5 percet kellene várni, amég az API 50-es batchekben átadja nekünk az adatokat.
 </h3>
 <hr>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</center>
-
 
